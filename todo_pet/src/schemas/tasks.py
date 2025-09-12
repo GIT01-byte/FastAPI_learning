@@ -7,6 +7,9 @@ class TaskCreateSchema(BaseModel):
     description: Optional[str] = None
     completed: bool = False
 
+class TaskUpdateSchema(BaseModel):
+    name: Optional[str]
+    description: Optional[str] = None
 
 class TaskSchema(BaseModel):
     id: int

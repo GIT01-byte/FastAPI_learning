@@ -1,10 +1,26 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from schemas.tasks import TaskCreateSchema
 from database.tasks import new_session
 from models.tasks import TaskOrm
 
 
 class TaskRepository:
+    @classmethod
+    async def get_all(cls):
+        async with new_session() as session:
+            query = select(TaskOrm)
+            result = await session.execute(query)
+            task_models = result.scalars().all()
+            return task_models
+
+    @classmethod
+    async def get_by_id(cls, task_id: int):
+        async with new_session() as session:
+            query = select(TaskOrm).where(TaskOrm.id == task_id)
+            result = await session.execute(query)
+            task = result.scalars().first()
+            return task
+
     @classmethod
     async def add_task(cls, data: TaskCreateSchema):
         async with new_session() as session:
@@ -17,9 +33,17 @@ class TaskRepository:
             return task.id
 
     @classmethod
-    async def get_all(cls):
+    async def update(cls, task: TaskOrm):
         async with new_session() as session:
-            query = select(TaskOrm)
-            result = await session.execute(query)
-            task_models = result.scalars().all()
-            return task_models
+            session.add(task)
+            await session.commit()
+            await session.refresh(task)
+            return task
+
+    @classmethod
+    async def delete_task(cls, task_id: int):
+        async with new_session() as session:
+            query = delete(TaskOrm).where(TaskOrm.id == task_id)
+            await session.execute(query)
+            await session.commit()
+            return True

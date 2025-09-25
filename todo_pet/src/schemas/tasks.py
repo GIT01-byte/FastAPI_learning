@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -14,3 +14,5 @@ class TaskUpdateSchema(BaseModel):
 class TaskSchema(BaseModel):
     id: int
 
+class TaskIDs(BaseModel):
+    ids: List[int]

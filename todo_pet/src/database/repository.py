@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy import delete, select
 from schemas.tasks import TaskCreateSchema
 from database.tasks import new_session
@@ -33,7 +34,7 @@ class TaskRepository:
             return task.id
 
     @classmethod
-    async def update(cls, task: TaskOrm):
+    async def update_task(cls, task: TaskOrm):
         async with new_session() as session:
             session.add(task)
             await session.commit()
@@ -47,3 +48,12 @@ class TaskRepository:
             await session.execute(query)
             await session.commit()
             return True
+
+    @classmethod
+    async def delete_task(cls, task_ids: List[int]):
+        async with new_session() as session:
+            query = delete(TaskOrm).where(TaskOrm.id.in_(task_ids))
+            await session.execute(query)
+            await session.commit()
+            return True
+        

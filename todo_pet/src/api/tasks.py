@@ -1,8 +1,8 @@
-from typing import Annotated
+from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
-from schemas.tasks import TaskCreateSchema, TaskSchema, TaskUpdateSchema
+from schemas.tasks import TaskCreateSchema, TaskSchema, TaskUpdateSchema, TaskIDs
 from database.repository import TaskRepository
 
 router = APIRouter(
@@ -35,7 +35,7 @@ async def edit_task(
     task.name = updated_task.name
     task.description = updated_task.description
 
-    updated_task = await TaskRepository.update(task) 
+    updated_task = await TaskRepository.update_task(task) 
     return {'succes': True, 'task': updated_task}
 
 @router.patch("/{task_id}/complete", response_model=TaskSchema)
@@ -45,7 +45,7 @@ async def complete_task(task_id: int):
         raise HTTPException(status_code=404, detail="Задача не найдена")
 
     task.completed = not task.completed
-    updated_task = await TaskRepository.update(task)
+    updated_task = await TaskRepository.update_task(task)
     return updated_task
 
 @router.delete('/{task_id}/delete', summary='Удалить задачу 🗑')
@@ -56,3 +56,13 @@ async def delete_task(task_id: int):
     
     await TaskRepository.delete_task(task_id)
     return {'succes': True} 
+
+@router.delete('/delete-many', summary='Удалить несколько задач 🗑')
+async def delete_tasks(task_ids: List[int] = Query(..., description="Список ID задач для удаления")):
+    for task_id in task_ids:
+        task = await TaskRepository.get_by_id(task_id)
+        if task is None:
+            raise HTTPException(status_code=404, detail=f"Задача с ID {task_id} не найдена") 
+
+    await TaskRepository.delete_tasks(task_ids) 
+    return {'success': True, 'deleted_count': len(task_ids)}

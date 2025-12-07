@@ -1,0 +1,11 @@
+prometheus_client
+fastapi
+uvicorn
+
+pydantic
+pydantic-settings
+
+pyjwt[crypto]
+bcrypt
+
+python-multipart

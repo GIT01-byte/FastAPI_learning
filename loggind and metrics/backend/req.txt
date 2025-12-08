@@ -4,6 +4,7 @@ uvicorn
 
 pydantic
 pydantic-settings
+pydantic[email]
 
 pyjwt[crypto]
 bcrypt
